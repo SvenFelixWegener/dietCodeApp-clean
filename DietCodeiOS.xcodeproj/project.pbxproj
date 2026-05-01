@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		27663C3D2FA53C6500958EBC /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 27663C3C2FA53C5D00958EBC /* .gitignore */; };
 		27916E6D2FA501F600C4E452 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E692FA501F600C4E452 /* RootView.swift */; };
 		27916E6E2FA501F600C4E452 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E5E2FA501F600C4E452 /* AuthService.swift */; };
 		27916E6F2FA501F600C4E452 /* DiaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E652FA501F600C4E452 /* DiaryViewModel.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		27663C3C2FA53C5D00958EBC /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		27916E492FA501A900C4E452 /* DietCodeiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DietCodeiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27916E572FA501F600C4E452 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		27916E582FA501F600C4E452 /* DietCodeiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DietCodeiOSApp.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				27916E662FA501F600C4E452 /* ViewModels */,
 				27916E6A2FA501F600C4E452 /* Views */,
 				27916E6B2FA501F600C4E452 /* README.md */,
+				27663C3C2FA53C5D00958EBC /* .gitignore */,
 			);
 			path = "ios-app";
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27663C3D2FA53C6500958EBC /* .gitignore in Resources */,
 				27916E7A2FA501F600C4E452 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
