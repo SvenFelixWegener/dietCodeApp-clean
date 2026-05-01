@@ -1,0 +1,22 @@
+# Node
+node_modules/
+npm-debug.log
+
+# Env
+.env
+
+# macOS
+.DS_Store
+
+# Xcode
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcuserdatad/
+*.xcuserstate
+
+# JetBrains
+.idea/
+
+# Logs
+logs/
+*.log
