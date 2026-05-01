@@ -1,6 +1,5 @@
 # Node
 node_modules/
-npm-debug.log
 
 # Env
 .env
@@ -18,5 +17,4 @@ DerivedData/
 .idea/
 
 # Logs
-logs/
 *.log
