@@ -10,9 +10,8 @@ struct LoginResponse: Codable {
 }
 
 struct DayData: Codable {
-    let date: String
+    var date: String
     var meals: [String: [MealEntry]]
-    var goals: Goals
 }
 
 struct Goals: Codable {
@@ -21,21 +20,11 @@ struct Goals: Codable {
 }
 
 struct MealEntry: Codable, Identifiable {
-    var id: UUID = UUID()
-    var productId: String
-    var productName: String
-    var brand: String
-    var code: String?
+    var id: String
+    var food: String
+    var kcal: Double
     var grams: Double
-    var kcalPer100g: Double
-    var proteinPer100g: Double
-
-    var kcal: Double { kcalPer100g * grams / 100 }
-    var protein: Double { proteinPer100g * grams / 100 }
-
-    enum CodingKeys: String, CodingKey {
-        case productId, productName, brand, code, grams, kcalPer100g, proteinPer100g
-    }
+    var protein: Double
 }
 
 struct ProductSearchResponse: Codable {

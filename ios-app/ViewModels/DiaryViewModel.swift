@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 final class DiaryViewModel: ObservableObject {
@@ -28,7 +29,15 @@ final class DiaryViewModel: ObservableObject {
     func addProduct(_ product: Product, grams: Double = 100) {
         guard var day else { return }
         var entries = day.meals[selectedMeal] ?? []
-        entries.append(MealEntry(productId: product.productId, productName: product.productName, brand: product.brand, code: product.code, grams: grams, kcalPer100g: product.kcalPer100g, proteinPer100g: product.proteinPer100g))
+        entries.append(
+            MealEntry(
+                id: UUID().uuidString,
+                food: product.productName,
+                kcal: product.kcalPer100g * grams / 100,
+                grams: grams,
+                protein: product.proteinPer100g * grams / 100
+            )
+        )
         day.meals[selectedMeal] = entries
         self.day = day
     }

@@ -2,16 +2,15 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var container: AppContainer
-    @StateObject private var appVM = AppViewModel()
+    @EnvironmentObject private var appViewModel: AppViewModel
 
     var body: some View {
-        Group {
-            if let token = appVM.token {
-                DiaryView(token: token)
-            } else {
+        NavigationStack {
+            if appViewModel.token == nil {
                 LoginView()
+            } else {
+                DiaryView(token: appViewModel.token!)
             }
         }
-        .environmentObject(appVM)
     }
 }
