@@ -1,4 +1,4 @@
-import SwiftUI
+internal import SwiftUI
 
 private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()

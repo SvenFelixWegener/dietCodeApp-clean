@@ -1,4 +1,4 @@
-import SwiftUI
+internal import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var container: AppContainer

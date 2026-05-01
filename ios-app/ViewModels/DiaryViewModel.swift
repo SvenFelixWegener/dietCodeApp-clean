@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+internal import SwiftUI
 
 @MainActor
 final class DiaryViewModel: ObservableObject {

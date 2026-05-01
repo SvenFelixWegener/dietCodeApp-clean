@@ -1,4 +1,4 @@
-import SwiftUI
+internal import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject private var container: AppContainer
