@@ -16,6 +16,7 @@ struct DiaryView: View {
 
     @State private var selectedDate = Date()
     @State private var expandedMeals = Set(mealTypes)
+    @State private var isScannerSheetPresented = false
 
     private var selectedDateString: String {
         dateFormatter.string(from: selectedDate)
@@ -73,6 +74,10 @@ struct DiaryView: View {
                         }
 
                         TextField("Suche", text: $vm.searchTerm)
+                        Button("Barcode scannen") {
+                            isScannerSheetPresented = true
+                        }
+
                         Button("Suchen") {
                             Task { await vm.searchProducts(container: container, token: token) }
                         }
@@ -115,6 +120,19 @@ struct DiaryView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(vm.errorMessage ?? "")
+            }
+            .sheet(isPresented: $isScannerSheetPresented) {
+                BarcodeScannerView(
+                    onCodeScanned: { barcode in
+                        isScannerSheetPresented = false
+                        Task {
+                            await vm.applyScannedBarcode(barcode, container: container, token: token)
+                        }
+                    },
+                    onClose: {
+                        isScannerSheetPresented = false
+                    }
+                )
             }
             .overlay {
                 if vm.isLoading || vm.isSaving {
