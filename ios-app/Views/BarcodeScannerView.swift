@@ -1,5 +1,6 @@
-import SwiftUI
+internal import SwiftUI
 import AVFoundation
+import Combine
 
 struct BarcodeScannerView: View {
     let onCodeScanned: (String) -> Void
