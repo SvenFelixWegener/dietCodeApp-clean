@@ -23,12 +23,26 @@ final class DiaryViewModel: ObservableObject {
     }
 
     func searchProducts(container: AppContainer, token: String) async {
-        guard !searchTerm.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        let trimmedSearchTerm = searchTerm.trimmingCharacters(in: .whitespaces)
+        guard !trimmedSearchTerm.isEmpty else { return }
         do {
-            searchResults = try await container.productService.search(token: token, food: searchTerm)
+            searchResults = try await container.productService.search(token: token, query: trimmedSearchTerm)
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func applyScannedBarcode(_ scannedCode: String, container: AppContainer, token: String) async {
+        searchTerm = normalizedBarcode(scannedCode)
+        await searchProducts(container: container, token: token)
+    }
+
+    private func normalizedBarcode(_ rawValue: String) -> String {
+        let cleaned = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleaned.count == 13, cleaned.hasPrefix("0") {
+            return String(cleaned.dropFirst())
+        }
+        return cleaned
     }
 
     func addProduct(_ product: Product, grams: Double = 100) {

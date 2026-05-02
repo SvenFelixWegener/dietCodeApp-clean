@@ -7,5 +7,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Die Kamera wird verwendet, um Produkt-Barcodes zu scannen.</string>
 </dict>
 </plist>
