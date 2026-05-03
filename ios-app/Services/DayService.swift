@@ -8,15 +8,22 @@ final class DayService {
     }
 
     func loadDay(token: String, date: String) async throws -> DayData {
-        var day: DayData = try await apiClient.request(
-            path: "api/day",
-            queryItems: [
-                URLQueryItem(name: "date", value: date)
-            ],
-            method: "GET",
-            token: token
-        )
+        let loadedDay: DayData
 
+        do {
+            loadedDay = try await apiClient.request(
+                path: "api/day",
+                queryItems: [
+                    URLQueryItem(name: "date", value: date)
+                ],
+                method: "GET",
+                token: token
+            )
+        } catch APIError.httpError(let statusCode, _) where statusCode == 404 {
+            loadedDay = DayData(date: date, meals: [:])
+        }
+
+        var day = loadedDay
         for meal in mealTypes where day.meals[meal] == nil {
             day.meals[meal] = []
         }
