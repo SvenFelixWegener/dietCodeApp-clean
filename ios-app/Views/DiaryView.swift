@@ -142,6 +142,8 @@ struct SummaryHeroCard: View { let consumedKcal: Double; let kcalGoal: Double; l
                     Text("\(Int(max(0, kcalGoal - consumedKcal))) kcal verbleibend").foregroundStyle(.secondary)
                     Text("Ziel: \(Int(kcalGoal)) kcal").font(.subheadline).foregroundStyle(.secondary)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
             MacroProgressBar(title: "Protein", current: consumedProtein, goal: proteinGoal, color: .green)
         }
@@ -245,6 +247,7 @@ struct QuickAddSheet: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var showAnalysisReview = false
 
+struct MacroProgressBar: View { let title: String; let current: Double; let goal: Double; let color: Color
     var body: some View {
         NavigationStack {
             FoodSearchView(vm: vm, token: token, onBarcodeTap: { isScannerShown = true }, onAnalyzeTap: {}) { product in
@@ -301,6 +304,8 @@ struct FoodSearchView: View {
                 ForEach(vm.searchResults) { product in
                     FoodSearchResultRow(product: product).onTapGesture { onSelect(product) }
                 }
+                Spacer()
+                Button(action: onAdd) { Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(.blue) }
             }
         }
     }
