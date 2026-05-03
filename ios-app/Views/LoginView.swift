@@ -19,9 +19,15 @@ struct LoginView: View {
                 }
 
                 Section {
-                    Button("Einloggen") {
+                    Button {
                         Task { await appVM.login(container: container, username: username, password: password) }
+                    } label: {
+                        Text("Anmelden")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                     .disabled(appVM.isBusy || username.isEmpty || password.isEmpty)
                 }
             }

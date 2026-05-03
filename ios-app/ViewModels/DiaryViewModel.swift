@@ -11,6 +11,7 @@ final class DiaryViewModel: ObservableObject {
     @Published var addMealSelection = mealTypes.first!
     @Published var searchTerm = ""
     @Published var searchResults: [Product] = []
+    @Published var isSearching = false
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var isSaving = false
@@ -30,8 +31,10 @@ final class DiaryViewModel: ObservableObject {
     }
 
     func searchProducts(container: AppContainer, token: String) async {
-        let trimmedSearchTerm = searchTerm.trimmingCharacters(in: .whitespaces)
+        let trimmedSearchTerm = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedSearchTerm.isEmpty else { return }
+        isSearching = true
+        defer { isSearching = false }
         do {
             searchResults = try await container.productService.search(token: token, query: trimmedSearchTerm)
         } catch {
