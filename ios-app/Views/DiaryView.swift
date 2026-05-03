@@ -63,6 +63,7 @@ struct DiaryDashboardView: View {
         .alert("Fehler", isPresented: Binding(get: { vm.errorMessage != nil }, set: { _ in vm.errorMessage = nil })) { Button("OK", role: .cancel) {} } message: { Text(vm.errorMessage ?? "") }
         .overlay { if vm.isLoading || vm.isSaving || vm.isAnalyzingIngredients { ProgressView("Zutaten werden analysiert …") } }
     }
+}
 
     private var header: some View {
         HStack {
