@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		274F4FC62FA7822400F6D455 /* IngredientAnalysisService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 274F4FC52FA7822400F6D455 /* IngredientAnalysisService.swift */; };
 		27916E6D2FA501F600C4E452 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E692FA501F600C4E452 /* RootView.swift */; };
 		27916E6E2FA501F600C4E452 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E5E2FA501F600C4E452 /* AuthService.swift */; };
 		27916E6F2FA501F600C4E452 /* DiaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27916E652FA501F600C4E452 /* DiaryViewModel.swift */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		274F4FC52FA7822400F6D455 /* IngredientAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientAnalysisService.swift; sourceTree = "<group>"; };
 		27916E492FA501A900C4E452 /* DietCodeiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DietCodeiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27916E572FA501F600C4E452 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		27916E582FA501F600C4E452 /* DietCodeiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DietCodeiOSApp.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		27916E612FA501F600C4E452 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				274F4FC52FA7822400F6D455 /* IngredientAnalysisService.swift */,
 				27916E5E2FA501F600C4E452 /* AuthService.swift */,
 				27916E5F2FA501F600C4E452 /* DayService.swift */,
 				27916E602FA501F600C4E452 /* ProductService.swift */,
@@ -253,6 +256,7 @@
 				27916E712FA501F600C4E452 /* Domain.swift in Sources */,
 				27916E722FA501F600C4E452 /* LoginView.swift in Sources */,
 				27916E732FA501F600C4E452 /* APIClient.swift in Sources */,
+				274F4FC62FA7822400F6D455 /* IngredientAnalysisService.swift in Sources */,
 				27916E742FA501F600C4E452 /* AppViewModel.swift in Sources */,
 				27916E752FA501F600C4E452 /* DietCodeiOSApp.swift in Sources */,
 				27916E762FA501F600C4E452 /* DiaryView.swift in Sources */,

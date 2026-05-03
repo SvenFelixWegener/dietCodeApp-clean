@@ -25,6 +25,7 @@ struct DiaryView: View {
 struct DiaryDashboardView: View {
     @EnvironmentObject private var container: AppContainer
     @StateObject private var vm = DiaryViewModel()
+
     let token: String
 
     @State private var selectedDate = Date()
@@ -97,6 +98,10 @@ struct DiaryDashboardView: View {
         default: return snackFallback
         }
     }
+}
+
+struct DateSelectorPill: View {
+    let date: Date
 
     private func toggleMeal(_ meal: String) { expandedMeals.formSymmetricDifference([meal]) }
 }
@@ -231,6 +236,7 @@ struct FoodSearchView: View {
         }
         .background(Color(.systemGroupedBackground))
     }
+}
 
     private func triggerSearch() {
         Task { await vm.searchProducts(container: container, token: token) }
@@ -264,6 +270,14 @@ struct IngredientAnalysisReviewSheet: View {
             }
             .navigationTitle("Erkannte Zutaten")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Als Gruppe hinzufügen") { let selected = analysis.ingredients.filter { selections[$0.id.uuidString, default: true] }; vm.addAnalyzedIngredientsToMeal(meal: selectedMeal, selected: selected, confidence: analysis.confidence, notes: analysis.notes); dismiss() } } }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(.secondarySystemBackground))
+        )
+        .contextMenu {
+            Button("Gruppe löschen", role: .destructive, action: onDeleteGroup)
         }
     }
 }
