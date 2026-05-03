@@ -6,26 +6,50 @@ struct AnalyzeIngredientsRequest: Codable {
     let mimeType: String
 }
 
-struct AnalyzeIngredientsResponse: Codable {
-    let ingredients: [AnalyzedIngredient]
-    let totals: AnalyzedTotals
-    let confidence: String
-    let notes: [String]
-}
-
-struct AnalyzedIngredient: Codable, Identifiable {
-    let id = UUID()
-    var name: String
-    var amount: Double?
-    var unit: String?
-    var estimatedKcal: Double?
-    var estimatedProtein: Double?
-}
-
 struct AnalyzedTotals: Codable {
     var kcal: Double?
     var protein: Double?
 }
+
+struct AnalyzeIngredientsResponse: Codable, Identifiable {
+    var id = UUID()
+
+    let ingredients: [AnalyzedIngredient]
+    let totals: IngredientTotals
+    let confidence: String
+    let notes: [String]
+
+    enum CodingKeys: String, CodingKey {
+        case ingredients
+        case totals
+        case confidence
+        case notes
+    }
+}
+
+struct IngredientTotals: Codable {
+    let kcal: Double?
+    let protein: Double?
+}
+
+struct AnalyzedIngredient: Codable, Identifiable {
+    var id = UUID()
+
+    let name: String
+    let amount: Double?
+    let unit: String?
+    let estimatedKcal: Double?
+    let estimatedProtein: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case amount
+        case unit
+        case estimatedKcal
+        case estimatedProtein
+    }
+}
+
 
 final class IngredientAnalysisService {
     private let apiClient: APIClient

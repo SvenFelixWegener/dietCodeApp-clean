@@ -111,14 +111,16 @@ final class DiaryViewModel: ObservableObject {
     }
 
 
-    func analyzeIngredientsImage(container: AppContainer, token: String, imageData: Data) async {
+    func analyzeIngredientsImage(container: AppContainer, token: String, imageData: Data) async -> AnalyzeIngredientsResponse? {
         isAnalyzingIngredients = true
         defer { isAnalyzingIngredients = false }
         do {
             let resized = ImageCompressor.jpegDataForUpload(from: imageData)
             ingredientAnalysis = try await container.ingredientAnalysisService.analyze(token: token, jpegBase64: resized.base64EncodedString())
+            return ingredientAnalysis
         } catch {
             errorMessage = error.localizedDescription
+            return nil
         }
     }
 
