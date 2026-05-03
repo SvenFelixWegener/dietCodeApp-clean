@@ -25,6 +25,12 @@ struct MealEntry: Codable, Identifiable {
     var kcal: Double
     var grams: Double
     var protein: Double
+    var groupId: String? = nil
+    var groupType: String? = nil
+    var groupTitle: String? = nil
+    var source: String? = nil
+    var confidence: String? = nil
+    var notes: [String]? = nil
 }
 
 struct ProductSearchResponse: Codable {
