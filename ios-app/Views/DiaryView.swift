@@ -1,4 +1,5 @@
 internal import SwiftUI
+import PhotosUI
 
 private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
@@ -141,6 +142,8 @@ struct SummaryHeroCard: View { let consumedKcal: Double; let kcalGoal: Double; l
                     Text("\(Int(max(0, kcalGoal - consumedKcal))) kcal verbleibend").foregroundStyle(.secondary)
                     Text("Ziel: \(Int(kcalGoal)) kcal").font(.subheadline).foregroundStyle(.secondary)
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
             MacroProgressBar(title: "Protein", current: consumedProtein, goal: proteinGoal, color: .green)
         }
@@ -187,16 +190,24 @@ struct MealDashboardCard: View {
             .onTapGesture(perform: onToggle)
 
             if isExpanded {
+                let grouped = Dictionary(grouping: entries, by: { $0.groupId ?? $0.id })
                 if entries.isEmpty {
                     Text("Noch keine Einträge").font(.callout).foregroundStyle(.secondary).padding(.vertical, 4)
                 } else {
-                    ForEach(entries) { entry in
-                        FoodEntryRow(entry: entry)
-                            .onTapGesture { onEditEntry(entry) }
-                            .contextMenu {
-                                Button("Duplizieren") { onDuplicateEntry(entry) }
-                                Button("Löschen", role: .destructive) { onDeleteEntry(entry) }
+                    ForEach(grouped.keys.sorted(), id: \.self) { key in
+                        let items = grouped[key] ?? []
+                        if let first = items.first, first.groupType == "ai_ingredients", items.count > 1 {
+                            AIIngredientGroupCard(entries: items, onDeleteGroup: { items.forEach(onDeleteEntry) }, onEditEntry: onEditEntry)
+                        } else {
+                            ForEach(items) { entry in
+                                FoodEntryRow(entry: entry)
+                                    .onTapGesture { onEditEntry(entry) }
+                                    .contextMenu {
+                                        Button("Duplizieren") { onDuplicateEntry(entry) }
+                                        Button("Löschen", role: .destructive) { onDeleteEntry(entry) }
+                                    }
                             }
+                        }
                     }
                 }
             }
@@ -233,14 +244,19 @@ struct QuickAddSheet: View {
     @Binding var selectedMeal: String
     @State private var selectedProduct: Product?
     @State private var isScannerShown = false
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var showAnalysisReview = false
 
+struct MacroProgressBar: View { let title: String; let current: Double; let goal: Double; let color: Color
     var body: some View {
         NavigationStack {
-            FoodSearchView(vm: vm, token: token, onBarcodeTap: { isScannerShown = true }) { product in
+            FoodSearchView(vm: vm, token: token, onBarcodeTap: { isScannerShown = true }, onAnalyzeTap: {}) { product in
                 selectedProduct = product
             }
-            .navigationTitle("Produkt hinzufügen")
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Picker("Mahlzeit", selection: $selectedMeal) { ForEach(mealTypes, id: \.self) { Text($0) } }.pickerStyle(.menu) } }
+            .navigationTitle("Quick Add")
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Picker("Mahlzeit", selection: $selectedMeal) { ForEach(mealTypes, id: \.self) { Text($0) } }.pickerStyle(.menu) }
+            ToolbarItem(placement: .topBarLeading) { PhotosPicker(selection: $selectedPhoto, matching: .images) { Label("Zutatenliste fotografieren", systemImage: "camera") } } }
+            .onChange(of: selectedPhoto) { _ in Task { if let data = try? await selectedPhoto?.loadTransferable(type: Data.self) { await vm.analyzeIngredientsImage(container: container, token: token, imageData: data); showAnalysisReview = vm.ingredientAnalysis != nil } } }
         }
         .sheet(item: $selectedProduct) { product in
             PortionEditorSheet(title: product.productName, grams: 100, kcalPer100g: product.kcalPer100g, proteinPer100g: product.proteinPer100g, actionTitle: "Hinzufügen") { grams in
@@ -248,6 +264,9 @@ struct QuickAddSheet: View {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             }
             .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showAnalysisReview) {
+            if let analysis = vm.ingredientAnalysis { IngredientAnalysisReviewSheet(vm: vm, analysis: analysis, selectedMeal: $selectedMeal) }
         }
         .sheet(isPresented: $isScannerShown) {
             BarcodeScannerView(onCodeScanned: { code in
@@ -263,6 +282,7 @@ struct FoodSearchView: View {
     @ObservedObject var vm: DiaryViewModel
     let token: String
     let onBarcodeTap: () -> Void
+    let onAnalyzeTap: () -> Void
     let onSelect: (Product) -> Void
 
     var body: some View {
@@ -278,11 +298,14 @@ struct FoodSearchView: View {
                         }
                     }
                 Button("Barcode scannen", action: onBarcodeTap)
+                Button("Zutatenliste fotografieren", action: onAnalyzeTap)
             }
             Section("Ergebnisse") {
                 ForEach(vm.searchResults) { product in
                     FoodSearchResultRow(product: product).onTapGesture { onSelect(product) }
                 }
+                Spacer()
+                Button(action: onAdd) { Image(systemName: "plus.circle.fill").font(.title3).foregroundStyle(.blue) }
             }
         }
     }
@@ -329,3 +352,50 @@ struct PortionEditorSheet: View {
 }
 
 private struct EntryEditContext: Identifiable { let id = UUID(); let meal: String; let entry: MealEntry }
+
+
+struct IngredientAnalysisReviewSheet: View {
+    @ObservedObject var vm: DiaryViewModel
+    let analysis: AnalyzeIngredientsResponse
+    @Binding var selectedMeal: String
+    @State private var selections: [String: Bool] = [:]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack { Text("Gesamt"); Spacer(); Text("\(Int(analysis.totals.kcal ?? 0)) kcal · \(Int(analysis.totals.protein ?? 0)) g") }
+                    ConfidenceBadge(confidence: analysis.confidence)
+                }
+                Section("Erkannte Zutaten") {
+                    ForEach(analysis.ingredients) { i in
+                        Toggle(isOn: Binding(get: { selections[i.id.uuidString, default: true] }, set: { selections[i.id.uuidString] = $0 })) {
+                            AIIngredientRow(ingredient: i)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Erkannte Zutaten")
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Als Gruppe hinzufügen") {
+                let selected = analysis.ingredients.filter { selections[$0.id.uuidString, default: true] }
+                vm.addAnalyzedIngredientsToMeal(meal: selectedMeal, selected: selected, confidence: analysis.confidence, notes: analysis.notes)
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                dismiss()
+            } } }
+        }
+    }
+}
+
+struct AIIngredientGroupCard: View { let entries: [MealEntry]; let onDeleteGroup: () -> Void; let onEditEntry: (MealEntry) -> Void
+var body: some View { VStack(alignment:.leading,spacing:6){HStack{Label(entries.first?.groupTitle ?? "AI Zutatenliste", systemImage: "sparkles"); Spacer(); ConfidenceBadge(confidence: entries.first?.confidence ?? "medium")}
+Text("\(entries.count) Zutaten · ca. \(Int(entries.reduce(0){$0+$1.kcal})) kcal · \(Int(entries.reduce(0){$0+$1.protein})) g Protein").font(.caption).foregroundStyle(.secondary)
+ForEach(entries){e in FoodEntryRow(entry:e).onTapGesture{onEditEntry(e)}}}.padding(10).background(RoundedRectangle(cornerRadius: 14).fill(Color(.secondarySystemBackground))).contextMenu{Button("Gruppe löschen", role:.destructive, action:onDeleteGroup)} } }
+
+struct AIIngredientRow: View { let ingredient: AnalyzedIngredient
+var body: some View { VStack(alignment:.leading){Text(ingredient.name); Text("\(Int(ingredient.amount ?? 100)) \(ingredient.unit ?? "g") · \(Int(ingredient.estimatedKcal ?? 0)) kcal · \(Int(ingredient.estimatedProtein ?? 0)) g Protein").font(.caption).foregroundStyle(.secondary)} } }
+
+struct ConfidenceBadge: View { let confidence: String
+var color: Color { confidence == "high" ? .green : (confidence == "medium" ? .orange : .gray)}
+var text: String { confidence == "high" ? "hoch" : (confidence == "medium" ? "mittel" : "niedrig") }
+var body: some View { Text(text).font(.caption2.weight(.semibold)).padding(.horizontal,8).padding(.vertical,4).background(Capsule().fill(color.opacity(0.18))).foregroundStyle(color) } }

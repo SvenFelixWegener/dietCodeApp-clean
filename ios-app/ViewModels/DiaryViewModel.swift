@@ -1,6 +1,9 @@
 import Foundation
 import Combine
 internal import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 @MainActor
 final class DiaryViewModel: ObservableObject {
@@ -11,6 +14,10 @@ final class DiaryViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var isSaving = false
+
+    @Published var ingredientAnalysis: AnalyzeIngredientsResponse?
+    @Published var isAnalyzingIngredients = false
+
 
     func load(container: AppContainer, token: String, date: String) async {
         isLoading = true
@@ -100,6 +107,31 @@ final class DiaryViewModel: ObservableObject {
         self.day = day
     }
 
+
+    func analyzeIngredientsImage(container: AppContainer, token: String, imageData: Data) async {
+        isAnalyzingIngredients = true
+        defer { isAnalyzingIngredients = false }
+        do {
+            let resized = ImageCompressor.jpegDataForUpload(from: imageData)
+            ingredientAnalysis = try await container.ingredientAnalysisService.analyze(token: token, jpegBase64: resized.base64EncodedString())
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func addAnalyzedIngredientsToMeal(meal: String, selected: [AnalyzedIngredient], confidence: String, notes: [String]) {
+        guard var day else { return }
+        let groupId = UUID().uuidString
+        let entries: [MealEntry] = selected.map { ingredient in
+            let grams = IngredientAmountMapper.grams(amount: ingredient.amount, unit: ingredient.unit)
+            let kcal = ingredient.estimatedKcal ?? 0
+            let protein = ingredient.estimatedProtein ?? 0
+            return MealEntry(id: UUID().uuidString, food: ingredient.name, kcal: kcal, grams: grams, protein: protein, groupId: groupId, groupType: "ai_ingredients", groupTitle: "AI Zutatenliste", source: "ai_image", confidence: confidence, notes: notes)
+        }
+        day.meals[meal, default: []].append(contentsOf: entries)
+        self.day = day
+    }
+
     func save(container: AppContainer, token: String) async {
         guard let day else { return }
         isSaving = true
@@ -110,4 +142,37 @@ final class DiaryViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+}
+
+
+enum IngredientAmountMapper {
+    static func grams(amount: Double?, unit: String?) -> Double {
+        guard let amount else { return 100 }
+        let u = (unit ?? "g").lowercased()
+        if ["kg", "kilogramm"].contains(u) { return amount * 1000 }
+        if ["ml"].contains(u) { return amount }
+        return amount
+    }
+}
+
+enum ImageCompressor {
+    static func jpegDataForUpload(from imageData: Data) -> Data {
+        #if canImport(UIKit)
+        guard let image = UIImage(data: imageData) else { return imageData }
+        let resized = resize(image: image, maxEdge: 1600)
+        return resized.jpegData(compressionQuality: 0.75) ?? imageData
+        #else
+        return imageData
+        #endif
+    }
+
+    #if canImport(UIKit)
+    private static func resize(image: UIImage, maxEdge: CGFloat) -> UIImage {
+        let size = image.size
+        let ratio = min(1, maxEdge / max(size.width, size.height))
+        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: newSize)) }
+    }
+    #endif
 }
