@@ -7,4 +7,5 @@ final class AppContainer: ObservableObject {
     lazy var authService = AuthService(apiClient: apiClient)
     lazy var dayService = DayService(apiClient: apiClient)
     lazy var productService = ProductService(apiClient: apiClient)
+    lazy var ingredientAnalysisService = IngredientAnalysisService(apiClient: apiClient)
 }
