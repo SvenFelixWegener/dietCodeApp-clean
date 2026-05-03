@@ -69,6 +69,37 @@ final class DiaryViewModel: ObservableObject {
         self.day = day
     }
 
+
+    func deleteEntry(_ entryID: String, meal: String) {
+        guard var day else { return }
+        var entries = day.meals[meal] ?? []
+        entries.removeAll { $0.id == entryID }
+        day.meals[meal] = entries
+        self.day = day
+    }
+
+    func duplicateEntry(_ entryID: String, meal: String) {
+        guard var day else { return }
+        guard let original = (day.meals[meal] ?? []).first(where: { $0.id == entryID }) else { return }
+        var copy = original
+        copy.id = UUID().uuidString
+        day.meals[meal, default: []].append(copy)
+        self.day = day
+    }
+
+    func updateEntry(_ entryID: String, meal: String, grams: Double) {
+        guard var day else { return }
+        guard let idx = day.meals[meal]?.firstIndex(where: { $0.id == entryID }) else { return }
+        var entry = day.meals[meal]![idx]
+        let kcalPerGram = entry.kcal / max(entry.grams, 1)
+        let proteinPerGram = entry.protein / max(entry.grams, 1)
+        entry.grams = grams
+        entry.kcal = kcalPerGram * grams
+        entry.protein = proteinPerGram * grams
+        day.meals[meal]![idx] = entry
+        self.day = day
+    }
+
     func save(container: AppContainer, token: String) async {
         guard let day else { return }
         isSaving = true
